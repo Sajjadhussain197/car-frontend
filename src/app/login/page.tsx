@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { signIn } from 'next-auth/react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -19,17 +20,19 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      console.log(`Attempting to sign in with email: ${email}`)
+      const result = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
       })
 
-      if (response.ok) {
+      console.log('Sign-in result:', result)
+
+      if (result?.ok) {
         router.push('/submit-car')
       } else {
-        const data = await response.json()
-        setError(data.message || 'Login failed')
+        setError(result?.error || 'Login failed')
       }
     } catch (err) {
       setError('An error occurred. Please try again.')
@@ -37,7 +40,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-blue-50">
+    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center ">
       <Card className="w-[350px]">
         <CardHeader>
           <CardTitle>Login</CardTitle>
@@ -67,7 +70,7 @@ export default function LoginPage() {
                 />
               </div>
             </div>
-            <Button className="w-full mt-4" type="submit">Login</Button>
+            <Button className="w-full mt-4 bg-blue-500 hover:bg-blue-600" type="submit">Login</Button>
           </form>
         </CardContent>
         <CardFooter>
